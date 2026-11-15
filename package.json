@@ -1,0 +1,21 @@
+{
+  "name": "hushledger-hybrid-ai",
+  "version": "1.0.0",
+  "description": "Private bill and receipt checker using Firebase AI Logic hybrid inference (Gemini Nano on-device in Chrome, cloud fallback).",
+  "scripts": {
+    "dev": "node scripts/sync-config.mjs && vite",
+    "build": "node scripts/sync-config.mjs && vite build",
+    "preview": "vite preview --port 4173",
+    "test": "node scripts/test-rules.mjs"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "dependencies": {
+    "firebase": "^13.3.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1",
+    "vite": "^8.3.8"
+  },
+  "private": true
+}

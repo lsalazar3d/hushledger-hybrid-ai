@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HushLedger — private bill & receipt checker</title>
+  <meta name="description" content="Paste a bill or receipt. HushLedger finds the line items, flags suspicious fees and drafts a dispute note, on-device with Gemini Nano in Chrome when it can, with cloud fallback via Firebase AI Logic." />
+  <meta name="theme-color" content="#0f1720" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="/icon.svg" alt="" width="34" height="34" />
+      <div>
+        <h1>HushLedger</h1>
+        <p class="tag">Check a bill without handing it over.</p>
+      </div>
+    </div>
+    <div class="chips" id="status-chips" aria-live="polite">
+      <span class="chip" id="chip-device">On-device AI: checking…</span>
+      <span class="chip" id="chip-cloud">Cloud fallback: checking…</span>
+      <span class="chip" id="chip-net">Network: …</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel input-panel">
+      <div class="panel-head">
+        <h2>1 · Paste the bill</h2>
+        <div class="samples" id="samples"></div>
+      </div>
+      <textarea id="bill" spellcheck="false" placeholder="Paste text from a bill, receipt or statement. Example:
+Monthly service ............ 65.00
+Convenience fee ............. 3.95
+Total due .................. 68.95"></textarea>
+
+      <div class="controls">
+        <fieldset class="mode">
+          <legend>Where the AI runs</legend>
+          <label><input type="radio" name="mode" value="prefer_on_device" checked /> <b>Hybrid</b> <span>on-device first, cloud if needed</span></label>
+          <label><input type="radio" name="mode" value="only_on_device" /> <b>Private only</b> <span>on-device or nothing</span></label>
+          <label><input type="radio" name="mode" value="only_in_cloud" /> <b>Cloud</b> <span>always use Gemini in the cloud</span></label>
+        </fieldset>
+        <label class="shield"><input type="checkbox" id="shield" checked />
+          <span><b>Privacy shield</b> — mask card, account, phone and email numbers before the AI sees the text</span></label>
+      </div>
+
+      <div class="actions">
+        <button id="analyze" class="primary">Check this bill</button>
+        <button id="get-model" class="ghost" title="Download Gemini Nano in Chrome">Get on-device model</button>
+      </div>
+      <div class="progress" id="dl" hidden><div class="bar" id="dl-bar"></div><span id="dl-text"></span></div>
+      <p class="fine" id="shield-note"></p>
+    </section>
+
+    <section class="panel results" id="results">
+      <div class="empty" id="empty">
+        <div class="empty-art" aria-hidden="true">🧾</div>
+        <h2>Nothing leaves this page until you press check.</h2>
+        <p>HushLedger first runs an instant math and fee scan in plain JavaScript. Then Firebase AI Logic reads the bill with <b>Gemini Nano on this device</b> when Chrome has it, and falls back to <b>Gemini in the cloud</b> when it doesn't. Every AI answer is labelled with where it ran.</p>
+      </div>
+
+      <div id="out" hidden>
+        <article class="card">
+          <div class="card-head"><h3>Instant scan</h3><span class="src src-local">Local rules · no AI</span></div>
+          <div id="scan"></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>AI read of the bill</h3><span class="src" id="ai-src">waiting…</span></div>
+          <div id="ai"></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>2 · Dispute note</h3><span class="src" id="note-src">not drafted yet</span></div>
+          <div class="note-row">
+            <select id="tone" aria-label="Tone">
+              <option value="polite">Polite</option>
+              <option value="firm">Firm</option>
+              <option value="brief">Very brief</option>
+            </select>
+            <button id="draft" class="primary small" disabled>Draft dispute note</button>
+            <button id="copy" class="ghost small" disabled>Copy</button>
+          </div>
+          <textarea id="note" class="note" placeholder="Run a check first. The note uses only the flagged fees, with placeholders for your name and account number." readonly></textarea>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>Privacy trail</h3><span class="src src-local">What left this page</span></div>
+          <table class="trail"><thead><tr><th>Time</th><th>Task</th><th>Ran</th><th>Sent</th><th>Masked</th><th>Speed</th></tr></thead><tbody id="trail"></tbody></table>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <section class="how">
+    <h2>How the hybrid works</h2>
+    <ol>
+      <li><b>Instant scan, no AI.</b> Plain JavaScript totals the lines, spots duplicates and known junk-fee words. Works offline.</li>
+      <li><b>Privacy shield.</b> Card, account, phone and email numbers are masked on your device before any prompt is built.</li>
+      <li><b>Firebase AI Logic, <code>PREFER_ON_DEVICE</code>.</b> Chrome's built-in Gemini Nano answers when it's on this device. Otherwise the same request falls back to Gemini through the Gemini Developer API.</li>
+      <li><b>Every answer is labelled</b> from the SDK's <code>inferenceSource</code>: <span class="src src-device">On this device</span> or <span class="src src-cloud">Cloud fallback</span>.</li>
+      <li><b>Math check.</b> The AI's numbers are compared with the bill's own total, so a wrong answer can't slip by.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>HushLedger is a hackathon project for #BuildHybridAI 2026. It is not legal or financial advice. Sample bills are fictional.</p>
+    <p>Built by Luis Alfredo Salazar Courtois with AI coding assistance (Grok Bot). Open source under Apache-2.0.</p>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
